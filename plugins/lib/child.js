@@ -16,8 +16,7 @@ var spawn = require('child_process').spawn
  * @returns {Function} a configured spawn
  * @api public
  */
-
-function compressor (type, flags, configuration) {
+function compressor(type, flags, configuration) {
   /**
    * Delegrate all the hard core processing to the vendor file.
    *
@@ -27,8 +26,7 @@ function compressor (type, flags, configuration) {
    * @param {Function} fn error first callback
    * @api public
    */
-
-  function compile (extension, content, options, fn) {
+  function compile(extension, content, options, fn) {
     // allow optional options argument
     if (_.isFunction(options)) {
       fn = options;
@@ -47,9 +45,9 @@ function compressor (type, flags, configuration) {
 
     // generate the --key value options, both the key and the value should added
     // seperately to the `args` array or the child_process will chocke.
-    Object.keys(config).filter(function filter (option) {
+    Object.keys(config).filter(function filter(option) {
       return config[option];
-    }).forEach(function format (option) {
+    }).forEach(function format(option) {
       var bool = _.isBoolean(config[option]);
 
       if (!bool || config[option]) {
@@ -73,12 +71,11 @@ function compressor (type, flags, configuration) {
      * @param {Buffer} chunk
      * @api private
      */
-
-    compressor.stdout.on('data', function data (chunk) {
+    compressor.stdout.on('data', function data(chunk) {
       buffer += chunk;
     });
 
-    compressor.stderr.on('data', function data (err) {
+    compressor.stderr.on('data', function data(err) {
       errors += err;
     });
 
@@ -123,7 +120,6 @@ function compressor (type, flags, configuration) {
  * @type {Number}
  * @api private
  */
-
 compressor.maximum = 256;
 
 /**
@@ -132,10 +128,10 @@ compressor.maximum = 256;
  * @type {Object}
  * @api private
  */
-
 compressor.paths = {
     yui: path.join(__dirname, '../../vendor/yui.jar')
   , closure: path.join(__dirname, '../../vendor/closure.jar')
+  , sqwish: path.join(__dirname, '../../node_modules/.bin/sqwish')
   , uglify: path.join(__dirname, '../../node_modules/.bin/uglifyjs')
 };
 
@@ -145,7 +141,6 @@ compressor.paths = {
  *
  * @api public
  */
-
 compressor.yui = compressor('java', ['-jar', compressor.paths.yui], {
     'charset': 'ascii'
   , 'type': 'js'
@@ -160,7 +155,6 @@ compressor.yui = compressor('java', ['-jar', compressor.paths.yui], {
  *
  * @api public
  */
-
 compressor.closure = compressor('java', ['-jar', compressor.paths.closure], {
     'charset': 'ascii'
   , 'compilation_level': 'SIMPLE_OPTIMIZATIONS'
@@ -178,7 +172,6 @@ compressor.closure = compressor('java', ['-jar', compressor.paths.closure], {
  *
  * @api public
  */
-
 compressor.uglifyjs = compressor(compressor.paths.uglify, [], {
     'ascii': true
   , 'unsafe': true
@@ -191,5 +184,4 @@ compressor.uglifyjs = compressor(compressor.paths.uglify, [], {
  *
  * @api public
  */
-
 module.exports = compressor;

@@ -2,7 +2,15 @@
 
 var child = require('./lib/child')
   , canihaz = require('canihaz')('square')
+  , which = require('which').sync
   , _ = require('lodash');
+
+/**
+ * Check if the user has the Java runtime installed.
+ *
+ * @type {Boolean}
+ */
+var javaEnabled = which('java');
 
 /**
  * Compression levels, the lower the faster, the higher the better.
@@ -10,15 +18,27 @@ var child = require('./lib/child')
  * @type {Array}
  * @api private
  */
-
-var level = [
-    ['yui']                       // level 0
-  , ['uglify']                    // level 1
-  , ['closure']                   // level 2
-  , ['yui', 'uglify']             // level 3
-  , ['yui', 'closure']            // level 4
-  , ['yui', 'closure', 'uglify']  // level 5
-];
+exports.levels = {
+    js: javaEnabled
+      ? [
+          ['yui']                       // level 0
+        , ['uglify']                    // level 1
+        , ['closure']                   // level 2
+        , ['yui', 'uglify']             // level 3
+        , ['yui', 'closure']            // level 4
+        , ['yui', 'closure', 'uglify']  // level 5
+      ]
+      : [
+          ['uglify']                    // level 0
+      ]
+  , css: javaEnabled
+      ? [
+          ['yui']
+      ]
+      : [
+          ['sqwish']                    // level 0
+      ]
+};
 
 /**
  * Compiles the code as small as possible.
@@ -33,11 +53,10 @@ var level = [
  * @returns {Function} middleware
  * @api public
  */
-
 module.exports = function setup(options) {
   var settings = {
       aggressive: true
-    , level: 2
+    , level: 1
     , disabled: []
   };
 
@@ -50,7 +69,6 @@ module.exports = function setup(options) {
    * @param {Function} next
    * @api private
    */
-
   return function crush(output, next) {
     // setup the configuration based on the plugin configuration
     var configuration = _.extend(
@@ -70,7 +88,6 @@ module.exports = function setup(options) {
      *
      * @api private
      */
-
     function walk() {
       if (!steps.length || errs.length) {
         if (errs.length) return next(new Error(errs.toString()), output);
@@ -112,7 +129,6 @@ module.exports = function setup(options) {
  * @type {String}
  * @api private
  */
-
 module.exports.description = 'Compiles the code as small as possible';
 
 /**
@@ -124,7 +140,6 @@ module.exports.description = 'Compiles the code as small as possible';
  * @param {Function} fn
  * @api private
  */
-
 exports.closure = function googleclosure(content, extension, aggressive, fn) {
   child.closure('js', content, {}, fn);
 };
@@ -140,7 +155,6 @@ exports.closure.js = true;
  * @param {Function} fn
  * @api private
  */
-
 exports.yui = function yui(content, extension, aggressive, fn) {
   child.yui(extension, content, {}, fn);
 };
@@ -156,7 +170,6 @@ exports.yui.css = true;
  * @param {Function} fn
  * @api private
  */
-
 exports.uglify = function ugly(content, extension, aggressive, fn) {
   var err, ast, code;
 
